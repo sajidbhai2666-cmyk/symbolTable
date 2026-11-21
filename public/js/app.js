@@ -221,39 +221,71 @@ class Application {
     if (statusEl) statusEl.textContent = 'Parsing & generating symbol table...';
 
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code,
-          language: this.currentLanguage
-        })
-      });
+      let analysis = null;
 
-      const res = await response.json();
-      if (res.success) {
-        this.currentAnalysis = res.analysis;
+      // 1. Client-side compilation engine (Instant, works offline, works on Live Server, file://, and GitHub Pages)
+      if (typeof window.analyzeSourceCode === 'function') {
+        analysis = window.analyzeSourceCode(code, this.currentLanguage);
+      } else {
+        // 2. Fallback to Express backend if client script is absent
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            code,
+            language: this.currentLanguage
+          })
+        });
+
+        const contentType = response.headers.get('content-type') || '';
+        if (!response.ok || !contentType.includes('application/json')) {
+          throw new Error(`API returned HTTP ${response.status} (${contentType || 'non-JSON'})`);
+        }
+
+        const res = await response.json();
+        if (res.success) {
+          analysis = res.analysis;
+        } else {
+          throw new Error(res.error || 'Analysis failed');
+        }
+      }
+
+      if (analysis) {
+        this.currentAnalysis = analysis;
 
         // Update Monaco squiggles/markers
-        this.editorManager.setDiagnostics(res.analysis.diagnostics);
+        this.editorManager.setDiagnostics(analysis.diagnostics);
 
         // Update Visualizer
-        this.visualizer.updateData(res.analysis);
+        this.visualizer.updateData(analysis);
 
         // Populate scope filter dropdown
-        this.updateScopeFilterDropdown(res.analysis.scopes);
+        this.updateScopeFilterDropdown(analysis.scopes);
 
         if (statusEl) {
-          const count = res.analysis.symbols.length;
-          const scopes = res.analysis.scopes.length;
+          const count = analysis.symbols.length;
+          const scopes = analysis.scopes.length;
           statusEl.textContent = `Generated: ${count} symbols across ${scopes} scopes.`;
         }
-      } else {
-        if (statusEl) statusEl.textContent = `Analysis error: ${res.error}`;
       }
     } catch (err) {
-      console.error('Failed to run analysis:', err);
-      if (statusEl) statusEl.textContent = `Connection error: ${err.message}`;
+      console.warn('Backend fetch failed, attempting client-side fallback:', err);
+      if (typeof window.analyzeSourceCode === 'function') {
+        try {
+          const analysis = window.analyzeSourceCode(code, this.currentLanguage);
+          this.currentAnalysis = analysis;
+          this.editorManager.setDiagnostics(analysis.diagnostics);
+          this.visualizer.updateData(analysis);
+          this.updateScopeFilterDropdown(analysis.scopes);
+          if (statusEl) {
+            statusEl.textContent = `Generated: ${analysis.symbols.length} symbols across ${analysis.scopes.length} scopes.`;
+          }
+          return;
+        } catch (clientErr) {
+          console.error('Client fallback error:', clientErr);
+        }
+      }
+      if (statusEl) statusEl.textContent = `Analysis notice: ${err.message}`;
     } finally {
       this.isAnalyzing = false;
     }
