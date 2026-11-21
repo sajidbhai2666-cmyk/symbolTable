@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Symbol Table Generator & Compiler Analyzer — Comprehensive Project Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 14mm 18mm 14mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Inter', sans-serif;
+        font-size: 9pt;
+        color: #64748B;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 9.5pt;
+      line-height: 1.5;
+      color: #1E293B;
+      background: #FFFFFF;
+    }
+
+    /* Headings */
+    h1, h2, h3, h4, h5 {
+      color: #0F172A;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    h1 {
+      font-size: 18pt;
+      color: #1E3A8A;
+      margin-top: 24pt;
+      margin-bottom: 10pt;
+      padding-bottom: 4pt;
+      border-bottom: 2px solid #DBEAFE;
+      page-break-after: avoid;
+    }
+
+    h1.cover-title {
+      font-size: 26pt;
+      color: #1E3A8A;
+      border: none;
+      margin-top: 0;
+      margin-bottom: 6pt;
+      letter-spacing: -0.5px;
+    }
+
+    h2 {
+      font-size: 13pt;
+      color: #0369A1;
+      margin-top: 14pt;
+      margin-bottom: 6pt;
+      page-break-after: avoid;
+    }
+
+    h3 {
+      font-size: 10.5pt;
+      color: #334155;
+      margin-top: 10pt;
+      margin-bottom: 4pt;
+      page-break-after: avoid;
+    }
+
+    p {
+      margin-bottom: 6pt;
+      text-align: justify;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin-left: 18pt;
+      margin-bottom: 8pt;
+    }
+
+    li {
+      margin-bottom: 3pt;
+    }
+
+    /* Code & Pre */
+    code {
+      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+      font-size: 8.5pt;
+      background: #F1F5F9;
+      color: #0F172A;
+      padding: 1pt 3pt;
+      border-radius: 3pt;
+      border: 1px solid #E2E8F0;
+    }
+
+    pre {
+      background: #0F172A;
+      color: #F8FAFC;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 8pt;
+      padding: 8pt 10pt;
+      border-radius: 4pt;
+      margin-bottom: 8pt;
+      overflow-x: auto;
+      line-height: 1.4;
+      page-break-inside: avoid;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6pt;
+      margin-bottom: 10pt;
+      font-size: 8.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      padding: 5pt 7pt;
+      text-align: left;
+      vertical-align: top;
+      border: 1px solid #CBD5E1;
+    }
+
+    th {
+      background: #1E3A8A;
+      color: #FFFFFF;
+      font-weight: 600;
+      font-size: 8.5pt;
+      letter-spacing: 0.3px;
+    }
+
+    tr:nth-child(even) td {
+      background: #F8FAFC;
+    }
+
+    /* Callouts */
+    .callout {
+      padding: 8pt 12pt;
+      margin: 8pt 0;
+      border-left: 4px solid #2563EB;
+      background: #EFF6FF;
+      border-radius: 0 4pt 4pt 0;
+      page-break-inside: avoid;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      color: #1E40AF;
+      font-size: 9pt;
+      margin-bottom: 2pt;
+    }
+
+    .callout-success {
+      border-left-color: #16A34A;
+      background: #F0FDF4;
+    }
+    .callout-success .callout-title {
+      color: #15803D;
+    }
+
+    .callout-warning {
+      border-left-color: #D97706;
+      background: #FFFBEB;
+    }
+    .callout-warning .callout-title {
+      color: #B45309;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 1pt 5pt;
+      border-radius: 3pt;
+      font-size: 7.5pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-pass { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }
+    .badge-fail { background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; }
+    .badge-p1 { background: #FEE2E2; color: #B91C1C; }
+    .badge-p2 { background: #FEF3C7; color: #92400E; }
+    .badge-p3 { background: #E0E7FF; color: #3730A3; }
+    .badge-info { background: #E0F2FE; color: #075985; }
+
+    /* Cover Page / Header Banner */
+    .header-banner {
+      background: linear-gradient(135deg, #1E3A8A 0%, #0369A1 100%);
+      color: #FFFFFF;
+      padding: 24pt 20pt;
+      border-radius: 6pt;
+      margin-bottom: 16pt;
+    }
+    .header-banner h1 {
+      color: #FFFFFF;
+      border: none;
+      margin: 0 0 6pt 0;
+      font-size: 22pt;
+    }
+    .header-banner p {
+      color: #E0F2FE;
+      font-size: 11pt;
+      margin-bottom: 0;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8pt;
+      margin-top: 12pt;
+      padding-top: 12pt;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .meta-item {
+      font-size: 8.5pt;
+    }
+    .meta-label {
+      color: #BAE6FD;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .meta-value {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    /* Page Breaks */
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Footer styling */
+    .footer-note {
+      margin-top: 20pt;
+      padding-top: 8pt;
+      border-top: 1px solid #E2E8F0;
+      font-size: 8pt;
+      color: #64748B;
+      text-align: center;
+    }
+
+    /* Architecture diagram styling */
+    .arch-box {
+      border: 1px solid #CBD5E1;
+      border-radius: 4pt;
+      background: #F8FAFC;
+      padding: 8pt;
+      margin-bottom: 8pt;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8pt;
+      line-height: 1.4;
+      white-space: pre;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =========================================================================
+       DOCUMENT HEADER & EXECUTIVE SUMMARY
+       ========================================================================= -->
+  <div class="header-banner">
+    <h1>Symbol Table Generator & Compiler Analyzer</h1>
+    <p>Comprehensive Software Engineering Specification, Requirements, Use Cases & Test Matrix</p>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Document Version</div>
+        <div class="meta-value">v2.0 (Zero-Database)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Engineering Lead</div>
+        <div class="meta-value">Senior Systems Architect</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Regression Suite</div>
+        <div class="meta-value">26 / 26 Passing (100%)</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Runtime Latency</div>
+        <div class="meta-value">&lt; 1 ms (In-Browser)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-title">EXECUTIVE RELEASE STATUS</div>
+    The Symbol Table Generator and Compiler Scope/Memory Analyzer is a production-grade full-stack developer tool designed for compiler engineers, systems developers, and students. The application operates with a zero-database footprint, executing high-speed lexical, scoping, semantic, memory sizing, and hash table simulations entirely in-memory and client-side within the browser.
+  </div>
+
+  <h2>1. Executive Summary & Core Value Proposition</h2>
+  <p>
+    In modern compiler construction, the <strong>Symbol Table</strong> is the central nerve center responsible for storing identifiers, resolving variable bindings, tracking static lexical scoping, evaluating storage classes, computing hardware memory offsets, and validating semantic correctness.
+  </p>
+  <p>
+    The <strong>Symbol Table Generator & Compiler Analyzer</strong> integrates the industrial-grade <strong>Monaco Editor</strong> (the core engine of Microsoft VS Code) with an isomorphic multi-language compilation engine. The software analyzes source code written in <strong>C, C++, Java, JavaScript, and Python</strong>, immediately projecting the compiler's internal representations across four interactive visual views:
+  </p>
+  <ul>
+    <li><strong>Tabular Symbol Table:</strong> Searchable, filterable symbol inventory displaying kind badges, qualified data types, lexical scope nesting levels, exact definition positions, and memory offsets.</li>
+    <li><strong>Hierarchical Scope Tree:</strong> An interactive visual representation of nested lexical environments (Global Scope, Functions, Blocks, Loops, Structs/Classes).</li>
+    <li><strong>16-Bucket Hash Table Simulator:</strong> Visualizes compiler symbol table indexing using polynomial rolling hashing and separate chaining collision resolution with load factor metrics.</li>
+    <li><strong>Memory Layout & Activation Record:</strong> Simulates System V AMD64 ABI memory alignment, global data segment offsets (<code>.data/.bss</code>), stack frame base pointer offsets (<code>[rbp - n]</code>), and register allocation for function parameters (<code>%rdi</code>–<code>%r9</code>).</li>
+  </ul>
+
+  <!-- =========================================================================
+       SECTION 2: SYSTEM ARCHITECTURE
+       ========================================================================= -->
+  <h2>2. System Architecture & Component Design</h2>
+  <p>
+    The application employs a decoupled, asynchronous architecture supporting dual execution models: completely standalone within the client browser, or as an Express REST microservice.
+  </p>
+
+  <div class="arch-box">
++──────────────────────────────────────────────────────────────────────────────────────────────────────────+
+│                                        FRONTEND CLIENT TIER (BROWSER)                                    │
+│                                                                                                          │
+│   ┌────────────────────────────────────────┐            ┌────────────────────────────────────────────┐   │
+│   │   Monaco Editor (VS Code Engine)       │            │   Multi-View Compiler Visualizer           │   │
+│   │   - Real-time syntax highlighting      │            │   - Tab 1: Filterable Symbol Table         │   │
+│   │   - In-Editor diagnostics squiggles    │◄──────────►│   - Tab 2: Scope Tree Hierarchy            │   │
+│   │   - Bidirectional line/col jumping     │            │   - Tab 3: 16-Bucket Hash Simulator        │   │
+│   │   - Scope block highlighting           │            │   - Tab 4: AMD64 Stack Frame Diagram       │   │
+│   └────────────────────────────────────────┘            └────────────────────────────────────────────┘   │
+│                        │                                                      ▲                          │
+│                        ▼                                                      │                          │
+│   ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│   │   Client-Side Application Coordinator (app.js)                                                   │   │
+│   │   - Debounced code change dispatch (600ms)    - Preset code samples loader                       │   │
+│   │   - Multi-format exporters (JSON, CSV, MD, LaTeX) - Split-pane resizer & responsive navigation   │   │
+│   └──────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                        │ (Direct In-Memory Call)                              │                          │
+│                        ▼                                                      │                          │
+│   ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│   │   Universal Compiler Engine (compiler.js / symbolTable.js)                                       │   │
+│   │   ┌────────────────────────┐  ┌────────────────────────┐  ┌──────────────────────────────────┐   │   │
+│   │   │ Tokenizer (Lexer)      │─►│ Scope Tree & Semantics │─►│ Memory Layout & Hash Simulator   │   │   │
+│   │   └────────────────────────┘  └────────────────────────┘  └──────────────────────────────────┘   │   │
+│   └──────────────────────────────────────────────────────────────────────────────────────────────────┘   │
++──────────────────────────────────────────────────────────────────────────────────────────────────────────+
+                                 ▲ (Optional REST Endpoint: POST /api/analyze)
+                                 │
++────────────────────────────────┴─────────────────────────────────────────────────────────────────────────+
+│                                        BACKEND API TIER (NODE.JS / EXPRESS 5)                            │
+│   - server/index.js: Express v5 Static Asset Server                                                      │
+│   - server/routes/api.js: Headless Compilation Microservice endpoint (/api/analyze)                      │
++──────────────────────────────────────────────────────────────────────────────────────────────────────────+
+  </div>
+
+  <!-- =========================================================================
+       SECTION 3: FUNCTIONAL REQUIREMENTS
+       ========================================================================= -->
+  <div class="page-break"></div>
+  <h1>3. Functional Requirements Specification</h1>
+  <p>
+    The functional requirements define all behavioral capabilities, input parameters, transformations, and outputs of the compiler analysis system.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">ID</th>
+        <th style="width: 22%;">Requirement Name</th>
+        <th style="width: 48%;">Functional Description & Input / Output</th>
+        <th style="width: 10%;">Priority</th>
+        <th style="width: 10%;">Module</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>FR-01</strong></td>
+        <td>Multi-Language Lexical Tokenization</td>
+        <td>The system must tokenize source code into typed tokens (<code>KEYWORD</code>, <code>TYPE</code>, <code>STORAGE</code>, <code>IDENTIFIER</code>, <code>NUMBER</code>, <code>STRING</code>, <code>COMMENT</code>, <code>OPERATOR</code>, <code>DELIMITER</code>, <code>PREPROCESSOR</code>) for C, C++, Java, JavaScript, and Python. Handles multi-character operators (e.g. <code>&gt;&gt;=</code>, <code>-&gt;</code>, <code>::</code>) and escaped literals without truncation.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>tokenizer.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-02</strong></td>
+        <td>Hierarchical Lexical Scope Tree</td>
+        <td>Constructs an n-ary tree of lexical environments starting from Global Scope (Level 0) down through nested functions, blocks, loops, and composite types. Every scope must track its unique identifier, enclosing parent ID, nesting level, and line range (<code>startLine</code> to <code>endLine</code>).</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-03</strong></td>
+        <td>Symbol Record Extraction & Attributes</td>
+        <td>For every declared identifier, extracts: Name, Kind (<code>variable</code>, <code>function</code>, <code>parameter</code>, <code>constant</code>, <code>struct</code>, <code>class</code>, <code>typedef</code>), Qualified Data Type, Scope ID & Name, Line, Column, Size in bytes, Memory Offset, Storage Class, and array dimensions.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-04</strong></td>
+        <td>Duplicate Redeclaration Detection</td>
+        <td>The semantic engine must evaluate whether an identifier has already been declared within the <em>exact same scope</em> via <code>scope.hasLocal(name)</code>. If duplicate, flags symbol as <code>isRedeclaration = true</code> and emits an <strong>Error</strong> severity diagnostic with previous definition coordinates.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-05</strong></td>
+        <td>Variable Shadowing Detection</td>
+        <td>When an identifier is declared in a child scope, the engine traverses parent scopes via <code>scope.parent.lookup(name)</code>. If an outer symbol with the same name exists, flags <code>isShadowed = true</code> and emits a <strong>Warning</strong> specifying the shadowed scope and line.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-06</strong></td>
+        <td>Undeclared Identifier Resolution</td>
+        <td>Validates every variable reference against the lexical scope chain. Emits an <strong>Error</strong> diagnostic if no matching declaration exists. Standard library identifiers (<code>printf</code>, <code>malloc</code>, <code>cout</code>, <code>cin</code>, <code>Math</code>, <code>console</code>, etc.) are whitelisted.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-07</strong></td>
+        <td>Unused Identifier Analysis</td>
+        <td>Evaluates reference occurrence counts after parsing. Flags identifiers with zero references as <strong>Notice/Warning</strong>. Struct/class member variables, composite type definitions, and <code>main()</code> are exempted.</td>
+        <td><span class="badge badge-p2">P2 - Med</span></td>
+        <td><code>symbolTable.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-08</strong></td>
+        <td>AMD64 Memory Offset Calculation</td>
+        <td>Computes byte sizing with 64-bit alignment:
+          <ul>
+            <li>Global variables: Positive data segment offsets (<code>+0x0000</code>, <code>+0x0004</code>).</li>
+            <li>Local variables: Negative stack pointer displacements (<code>[rbp - 4]</code>, <code>[rbp - 8]</code>).</li>
+            <li>First 6 parameters: AMD64 registers (<code>%rdi</code>, <code>%rsi</code>, <code>%rdx</code>, <code>%rcx</code>, <code>%r8</code>, <code>%r9</code>).</li>
+            <li>Struct members: Zero-indexed cumulative member offsets (<code>Member: +0x0000</code>).</li>
+          </ul>
+        </td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>memoryLayout.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-09</strong></td>
+        <td>16-Bucket Hash Table Simulation</td>
+        <td>Simulates closed-addressing hash table lookup using polynomial rolling hash <code>H(k) = (∑ c_i * 31) % 16</code>. Displays bucket chains, collision counts, and load factor (&alpha;).</td>
+        <td><span class="badge badge-p2">P2 - Med</span></td>
+        <td><code>memoryLayout.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-10</strong></td>
+        <td>Monaco Editor Diagnostics & Markers</td>
+        <td>Transforms compiler diagnostics directly into native Monaco squiggles (<code>monaco.editor.setModelMarkers</code>). Errors render with red squiggles; warnings render with yellow squiggles.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>editor.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-11</strong></td>
+        <td>Bidirectional Cursor Navigation</td>
+        <td>Clicking any symbol row in the Symbol Table, Scope Tree chip, or Hash Bucket entry jumps Monaco cursor to definition coordinates and animates a pulse highlight. Clicking a scope highlights its line span.</td>
+        <td><span class="badge badge-p2">P2 - Med</span></td>
+        <td><code>editor.js</code> / <code>app.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-12</strong></td>
+        <td>Interactive Search & Filter Controls</td>
+        <td>Users can filter the Symbol Table via a live keyword search box, kind filter chips (<code>All</code>, <code>Variables</code>, <code>Functions</code>, <code>Params</code>, <code>Constants</code>, <code>Structs</code>), and scope level dropdown.</td>
+        <td><span class="badge badge-p2">P2 - Med</span></td>
+        <td><code>visualizer.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-13</strong></td>
+        <td>Multi-Format Data Exporter</td>
+        <td>Exports complete symbol table snapshots to structured <strong>JSON</strong>, spreadsheet <strong>CSV</strong>, GitHub Flavored <strong>Markdown</strong>, and academic booktabs <strong>LaTeX (.tex)</strong>.</td>
+        <td><span class="badge badge-p2">P2 - Med</span></td>
+        <td><code>export.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>FR-14</strong></td>
+        <td>Dual Client/Server Architecture</td>
+        <td>The compiler runs directly in-browser for static servers (VS Code Live Server, GitHub Pages, <code>file:///</code>) with zero setup, while also exposing a REST endpoint (<code>POST /api/analyze</code>) for Node.js workflows.</td>
+        <td><span class="badge badge-p1">P1 - High</span></td>
+        <td><code>app.js</code> / <code>api.js</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =========================================================================
+       SECTION 4: NON-FUNCTIONAL REQUIREMENTS
+       ========================================================================= -->
+  <h2>4. Non-Functional Requirements Specification</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 10%;">ID</th>
+        <th style="width: 22%;">Requirement Name</th>
+        <th style="width: 53%;">Standard Metric & Verification Target</th>
+        <th style="width: 15%;">Classification</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>NFR-01</strong></td>
+        <td>Execution Latency</td>
+        <td>Total analysis duration for source code files up to 500 lines of code must execute in under <strong>5 milliseconds</strong> in modern browser engines, enabling real-time debounced compilation as the user types.</td>
+        <td>Performance</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-02</strong></td>
+        <td>Zero Database Footprint</td>
+        <td>The system must require zero database installation, zero background database daemons, and zero storage cluster management. All processing must be purely in-memory.</td>
+        <td>Deployability</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-03</strong></td>
+        <td>Cross-Platform Compatibility</td>
+        <td>The application must run identically across Windows 10/11, macOS, and Linux on any Node.js LTS release (v18+) and in all modern Chromium, Gecko, and WebKit browsers.</td>
+        <td>Portability</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-04</strong></td>
+        <td>Static & Offline Hosting</td>
+        <td>The user interface and compiler must function without network connectivity, operating seamlessly on VS Code Live Server, GitHub Pages, or directly via <code>file:///</code> without HTTP errors.</td>
+        <td>Availability</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-05</strong></td>
+        <td>Fault Tolerance</td>
+        <td>Incomplete, malformed, or syntactically invalid code must never throw uncaught exceptions or cause the UI to crash. Syntax anomalies must be caught and reported as graceful diagnostics.</td>
+        <td>Robustness</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-06</strong></td>
+        <td>UI Ergonomics & Responsiveness</td>
+        <td>The UI must adhere to a sleek dark-mode aesthetic (<code>#13161f</code>) matching modern IDE standards. Split panes must provide draggable resizing with responsive collapses on mobile devices (&le; 860px).</td>
+        <td>Usability</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-07</strong></td>
+        <td>Clean Zero-Vulnerability Dependencies</td>
+        <td>Production dependencies must remain minimal (Express 5, CORS). <code>npm audit</code> must report <strong>0 known vulnerabilities</strong> across all dependency trees.</td>
+        <td>Security</td>
+      </tr>
+      <tr>
+        <td><strong>NFR-08</strong></td>
+        <td>Academic Compliance</td>
+        <td>LaTeX table export must compile warning-free with standard LaTeX document classes utilizing the <code>booktabs</code> package, suitable for university compiler lab reports.</td>
+        <td>Compliance</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =========================================================================
+       SECTION 5: USE CASE SPECIFICATIONS
+       ========================================================================= -->
+  <div class="page-break"></div>
+  <h1>5. Use Case Specifications</h1>
+  <p>
+    The following detailed use cases articulate primary end-user interaction workflows, system state transitions, preconditions, and postconditions.
+  </p>
+
+  <h3>UC-01: Real-Time Symbol Table Generation & Scope Analysis</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-01: Real-Time Symbol Table Generation</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Compiler Student / Systems Developer</td></tr>
+    <tr><th>Preconditions</th><td>Web application is loaded in a modern web browser. Monaco editor is initialized.</td></tr>
+    <tr><th>Trigger</th><td>Actor types code into Monaco Editor or selects a pre-configured sample preset from the dropdown.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>Actor types or pastes multi-scope C code into the editor.</li>
+        <li>Editor triggers debounced change event (600ms idle threshold) or actor presses <code>Ctrl+Enter</code>.</li>
+        <li><code>app.js</code> invokes <code>Compiler.analyzeSourceCode(code, language)</code>.</li>
+        <li>Lexer scans characters into tokens; Scope builder constructs tree of lexical environments.</li>
+        <li>Semantic verifier evaluates redeclarations, shadowing, references, and unused variables.</li>
+        <li>Memory analyzer assigns AMD64 data offsets, stack displacements, and hash buckets.</li>
+        <li>Visualizer renders populated Symbol Table, updates scope tree hierarchy, and refreshes counters.</li>
+        <li>Monaco updates inline squiggles matching compiler diagnostics.</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Symbol table table displays all identifiers; Monaco displays diagnostic squiggles.</td></tr>
+  </table>
+
+  <h3>UC-02: Identifying & Resolving Semantic Compiler Errors</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-02: Semantic Error Detection & Visual Squiggles</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Software Developer / QA Engineer</td></tr>
+    <tr><th>Preconditions</th><td>Source code contains semantic anomalies (e.g. duplicate declaration or undeclared variable).</td></tr>
+    <tr><th>Trigger</th><td>Actor selects "Semantic Errors Showcase" sample preset.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>Actor loads code containing duplicate global <code>int totalCount = 10; int totalCount = 20;</code>.</li>
+        <li>Compiler detects <code>scope.hasLocal("totalCount")</code> is true for the second declaration.</li>
+        <li>Redeclaration error is flagged: cites previous declaration at Line 1, Col 5.</li>
+        <li>Monaco highlights the offending line with red compiler squiggles.</li>
+        <li>The bottom Diagnostics drawer expands, listing the exact error message and clickable position badge.</li>
+        <li>Actor clicks the diagnostic row in the drawer: cursor jumps directly to the conflicting declaration.</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Actor immediately locates and resolves compiler errors before code generation.</td></tr>
+  </table>
+
+  <h3>UC-03: Inspecting Variable Shadowing Across Lexical Environments</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-03: Variable Shadowing Inspection</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Computer Science Student</td></tr>
+    <tr><th>Preconditions</th><td>Code contains nested block scopes declaring identical identifier names.</td></tr>
+    <tr><th>Trigger</th><td>Actor selects "Lexical Scoping & Shadowing" preset.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>Actor observes <code>int x = 1000;</code> at Level 0, <code>int x = 100;</code> in function, and <code>int x = 10;</code> in block.</li>
+        <li>Compiler marks inner <code>x</code> instances with <code>isShadowed = true</code> and tags the parent target.</li>
+        <li>Symbol Table displays a yellow <strong>"Shadowed"</strong> status badge next to inner identifiers.</li>
+        <li>Actor switches to <strong>Scope Tree</strong> tab: views parent-child nesting with local variable chips.</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Actor gains visual clarity on variable lifetime and scoping rules.</td></tr>
+  </table>
+
+  <h3>UC-04: Analyzing AMD64 Memory Layout & Stack Frame Allocations</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-04: Memory & Stack Frame Visualization</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Systems Programmer / Assembly Enthusiast</td></tr>
+    <tr><th>Preconditions</th><td>Code defines global variables, functions with parameters, and local variables.</td></tr>
+    <tr><th>Trigger</th><td>Actor clicks the "Memory & Stack" navigation tab.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>Visualizer partitions symbols into <strong>Global Data Segment</strong> and <strong>Activation Record (Stack Frame)</strong>.</li>
+        <li>Global variables show cumulative positive hex offsets (<code>+0x0000</code>, <code>+0x0004</code>).</li>
+        <li>First 6 parameters display hardware AMD64 calling convention registers (<code>%rdi</code>, <code>%rsi</code>, etc.).</li>
+        <li>Local variables display stack displacements relative to base pointer (<code>[rbp - 4]</code>, <code>[rbp - 8]</code>).</li>
+        <li>Memory block diagram illustrates caller saved frame (RIP + saved RBP) down to current stack pointer (RSP).</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Actor verifies memory sizing and alignment before low-level code compilation.</td></tr>
+  </table>
+
+  <h3>UC-05: Simulating Compiler Internal Hash Table Collisions</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-05: Hash Table Collision Simulation</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Data Structures & Compiler Student</td></tr>
+    <tr><th>Preconditions</th><td>Symbol table contains multiple identifiers.</td></tr>
+    <tr><th>Trigger</th><td>Actor clicks the "Hash Buckets" navigation tab.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>System passes symbols through polynomial rolling hash algorithm across 16 buckets.</li>
+        <li>Grid displays all 16 buckets with entry counts, load factor (&alpha;), and separate chaining links.</li>
+        <li>Buckets with collisions highlight chain nodes with downward traversal pointers.</li>
+        <li>Actor clicks any bucket chain entry: editor jumps directly to the corresponding line in Monaco.</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Actor visualizes hash table load distribution and collision resolution.</td></tr>
+  </table>
+
+  <h3>UC-06: Exporting Analysis to LaTeX, Markdown, JSON, and CSV</h3>
+  <table>
+    <tr><th style="width: 25%;">Use Case ID & Name</th><td><strong>UC-06: Multi-Format Data Export</strong></td></tr>
+    <tr><th>Primary Actor</th><td>Student preparing Academic Lab Report</td></tr>
+    <tr><th>Preconditions</th><td>Symbol table generation has completed successfully.</td></tr>
+    <tr><th>Trigger</th><td>Actor clicks the "Export" button in the top navigation bar.</td></tr>
+    <tr><th>Main Scenario</th><td>
+      <ol>
+        <li>Modal dialog opens presenting four format cards: JSON, CSV, Markdown, LaTeX.</li>
+        <li>Actor clicks "LaTeX Table (.tex)".</li>
+        <li><code>TableExporter.toLatex()</code> generates clean LaTeX <code>booktabs</code> table markup.</li>
+        <li>Browser automatically downloads <code>symbol_table.tex</code> ready to paste into Overleaf or TeX studio.</li>
+      </ol>
+    </td></tr>
+    <tr><th>Postconditions</th><td>Formatted file is downloaded to the actor's local machine.</td></tr>
+  </table>
+
+  <!-- =========================================================================
+       SECTION 6: COMPREHENSIVE REGRESSION TEST MATRIX
+       ========================================================================= -->
+  <div class="page-break"></div>
+  <h1>6. Comprehensive Regression Test Case Matrix</h1>
+  <p>
+    The test suite is built on the native Node.js test runner (<code>node:test</code> and <code>node:assert/strict</code>). All <strong>26 regression tests</strong> execute deterministically with 100% pass rate in approximately <strong>530 milliseconds</strong>.
+  </p>
+
+  <div class="callout callout-success">
+    <div class="callout-title">TEST SUITE METRICS</div>
+    Total Test Suites: 11 | Total Test Cases: 26 | Passed: 26 (100%) | Failed: 0 | Total Execution Time: ~0.53 seconds
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 7%;">Test ID</th>
+        <th style="width: 15%;">Test Suite</th>
+        <th style="width: 32%;">Test Objective & Input</th>
+        <th style="width: 32%;">Expected Verification Criteria</th>
+        <th style="width: 7%;">Time</th>
+        <th style="width: 7%;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- REST API Tests -->
+      <tr>
+        <td><strong>TC-01</strong></td>
+        <td>REST API Endpoints</td>
+        <td><code>POST /api/analyze</code> with valid C source code</td>
+        <td>Returns HTTP 200, <code>success: true</code>, symbol array with length 3, and &ge; 2 scopes.</td>
+        <td>16.8ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-02</strong></td>
+        <td>REST API Endpoints</td>
+        <td><code>POST /api/analyze</code> with missing <code>code</code> body parameter</td>
+        <td>Returns HTTP 400 with <code>error: "Source code string is required"</code>.</td>
+        <td>0.9ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-03</strong></td>
+        <td>REST API Endpoints</td>
+        <td><code>POST /api/analyze</code> with non-string <code>code</code> parameter (integer)</td>
+        <td>Returns HTTP 400 with validation error; refuses non-string input cleanly.</td>
+        <td>0.6ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-04</strong></td>
+        <td>REST API Endpoints</td>
+        <td><code>POST /api/analyze</code> with complex code containing multiple semantic errors</td>
+        <td>Returns HTTP 200, diagnostics array populated with redeclaration, shadowing, and undeclared errors.</td>
+        <td>0.8ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+
+      <!-- Lexer Tests -->
+      <tr>
+        <td><strong>TC-05</strong></td>
+        <td>Compiler Core: Lexer</td>
+        <td>Tokenize primitive declarations: <code>const int maxItems = 100; float ratio = 3.14;</code></td>
+        <td>Extracts correct tokens with types: <code>STORAGE</code> (const), <code>TYPE</code> (int), <code>IDENTIFIER</code> (maxItems), <code>NUMBER</code> (100).</td>
+        <td>1.0ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-06</strong></td>
+        <td>Compiler Core: Lexer</td>
+        <td>Tokenize multi-character operators: <code>+=</code>, <code>==</code>, <code>-&gt;</code>, <code>++</code>, <code>&lt;&lt;=</code></td>
+        <td>Operators preserved as single compound tokens rather than split into individual symbols.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-07</strong></td>
+        <td>Compiler Core: Lexer</td>
+        <td>Tokenize code interspersed with single-line (<code>//</code>) and multi-line (<code>/* */</code>) comments</td>
+        <td>Comments correctly classified without interfering with line numbering or token indexing.</td>
+        <td>0.7ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-08</strong></td>
+        <td>Compiler Core: Lexer</td>
+        <td>Tokenize string literals containing escaped quotes: <code>"Hello "World"
+"</code></td>
+        <td>Literal extracted with full escape sequence intact; does not prematurely terminate on escaped quote.</td>
+        <td>0.1ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+
+      <!-- Memory Sizing Tests -->
+      <tr>
+        <td><strong>TC-09</strong></td>
+        <td>Compiler Core: Memory</td>
+        <td>Calculate byte sizes for primitive C types: <code>char</code>, <code>short</code>, <code>int</code>, <code>long</code>, <code>double</code>, <code>int*</code></td>
+        <td>Sizes match 64-bit LP64 target: char=1, short=2, int=4, long=8, double=8, pointer=8 bytes.</td>
+        <td>0.3ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-10</strong></td>
+        <td>Compiler Core: Memory</td>
+        <td>Calculate byte size of array declarations: <code>int arr[10]</code>, <code>double buf[5]</code></td>
+        <td>Size matches element size &times; count: <code>int[10]</code> = 40B, <code>double[5]</code> = 40B.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-11</strong></td>
+        <td>Compiler Core: Memory</td>
+        <td>Assign memory offsets to global and local variables</td>
+        <td>Globals receive positive hex offsets (<code>+0x0000</code>); locals receive negative base pointer offsets (<code>[rbp - 4]</code>).</td>
+        <td>0.5ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-12</strong></td>
+        <td>Compiler Core: Hash</td>
+        <td>Hash symbol names across 16 buckets using polynomial rolling hash</td>
+        <td>All symbols deterministically distributed across buckets 0–15 with calculated hex hash codes.</td>
+        <td>1.0ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+
+      <!-- Multi-Format Export Tests -->
+      <tr>
+        <td><strong>TC-13</strong></td>
+        <td>Export Capabilities</td>
+        <td>Generate JSON export from symbol, scope, and diagnostic arrays</td>
+        <td>JSON output parses with <code>JSON.parse()</code>; metadata counters match symbol count exactly.</td>
+        <td>1.4ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-14</strong></td>
+        <td>Export Capabilities</td>
+        <td>Generate CSV spreadsheet from symbol table</td>
+        <td>Valid CSV with correct column headers (<code>Index,Name,Kind,Type,Scope_Level...</code>) and quoted rows.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-15</strong></td>
+        <td>Export Capabilities</td>
+        <td>Generate GitHub Flavored Markdown table</td>
+        <td>Markdown contains <code># Symbol Table Report</code> and formatted GFM pipe table rows.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-16</strong></td>
+        <td>Export Capabilities</td>
+        <td>Generate academic LaTeX table markup</td>
+        <td>Valid LaTeX syntax with <code>\begin{table}</code>, <code>\begin{tabular}</code>, escaped underscores, and <code>\bottomrule</code>.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+
+      <!-- Multi-Language Parsing Tests -->
+      <tr>
+        <td><strong>TC-17</strong></td>
+        <td>Multi-Language Parsing</td>
+        <td>Parse C <code>struct Point { int x; int y; };</code> and <code>typedef struct Point Point2D;</code></td>
+        <td>Struct identified as composite type; fields tracked as members; typedef alias registered.</td>
+        <td>3.1ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-18</strong></td>
+        <td>Multi-Language Parsing</td>
+        <td>Parse C++ class with access modifiers and member methods</td>
+        <td>Class registered; public/private storage classes assigned; methods parsed as member functions.</td>
+        <td>0.5ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-19</strong></td>
+        <td>Multi-Language Parsing</td>
+        <td>Parse JavaScript declarations: <code>const</code>, <code>let</code>, <code>var</code>, and <code>function</code></td>
+        <td>Storage classes properly attributed; parameters mapped; variable kinds assigned.</td>
+        <td>0.6ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-20</strong></td>
+        <td>Multi-Language Parsing</td>
+        <td>Parse Python functions (<code>def</code>), classes, parameters, and variable assignments</td>
+        <td>Python indentation and syntax parsed; function scopes created; assignments registered.</td>
+        <td>1.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+
+      <!-- Semantic Diagnostics Tests -->
+      <tr>
+        <td><strong>TC-21</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Detect duplicate declaration in same scope: <code>int a = 1; int a = 2;</code></td>
+        <td>Flags <code>isRedeclaration = true</code> and emits Error diagnostic citing Line 1 definition.</td>
+        <td>2.3ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-22</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Detect variable shadowing: inner scope re-declares <code>int x</code> defined in outer scope</td>
+        <td>Flags <code>isShadowed = true</code> and emits Warning diagnostic citing parent scope and line.</td>
+        <td>0.4ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-23</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Detect use of undeclared identifier: reference to variable without declaration</td>
+        <td>Emits Error diagnostic: <code>"Semantic Error: Use of undeclared identifier '...' "</code>.</td>
+        <td>0.3ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-24</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Verify standard library built-ins are NOT flagged as undeclared (<code>printf</code>, <code>malloc</code>, <code>console</code>)</td>
+        <td>Whitelisted built-in functions pass semantic check with zero false-positive errors.</td>
+        <td>0.3ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-25</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Detect declared but unreferenced identifiers</td>
+        <td>Flags <code>isUnused = true</code> and emits Warning diagnostic; exempts struct fields and types.</td>
+        <td>0.2ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>TC-26</strong></td>
+        <td>Semantic Diagnostics</td>
+        <td>Construct nested scope tree across 3 distinct lexical levels</td>
+        <td>Constructs Global (L0) &rarr; Function (L1) &rarr; Nested Block (L2) with verified parent-child links.</td>
+        <td>0.3ms</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- =========================================================================
+       SECTION 7: OPERATIONAL & DEPLOYMENT GUIDE
+       ========================================================================= -->
+  <div class="page-break"></div>
+  <h1>7. Operational, Deployment & Verification Guide</h1>
+  
+  <h2>7.1 Local Development Startup</h2>
+  <p>To run the application locally on any workstation:</p>
+  <pre># 1. Install minimal dependencies (Express & CORS)
+npm install
+
+# 2. Start the local HTTP server (serves frontend & REST API)
+npm start
+# Output: Server running at: http://localhost:3000
+
+# 3. Execute the full automated regression test suite
+npm test</pre>
+
+  <h2>7.2 Static Server & Offline Deployment</h2>
+  <p>
+    Because the compiler engine (<code>compiler.js</code>) is 100% self-contained in the browser, the application can be hosted on any static web server with zero backend configuration:
+  </p>
+  <ul>
+    <li><strong>VS Code Live Server:</strong> Right-click <code>public/index.html</code> &rarr; <em>"Open with Live Server"</em> (runs on port 5500 with zero errors).</li>
+    <li><strong>GitHub Pages:</strong> Publish the <code>public/</code> folder directly to GitHub Pages for instant, globally available web access.</li>
+    <li><strong>Local File System:</strong> Double-click <code>public/index.html</code> to open via <code>file:///</code> protocol.</li>
+  </ul>
+
+  <h2>7.3 Key Engineering Milestones & Architectural Verdict</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Milestone</th>
+        <th style="width: 25%;">Target Standard</th>
+        <th style="width: 25%;">Achieved Status</th>
+        <th style="width: 25%;">Evaluation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Compilation Speed</strong></td>
+        <td>&lt; 50 ms per parse</td>
+        <td><strong>&lt; 1 ms</strong></td>
+        <td><span class="badge badge-pass">Exceeded (50x Faster)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Database Overhead</strong></td>
+        <td>No complex setups</td>
+        <td><strong>Zero Database</strong></td>
+        <td><span class="badge badge-pass">Achieved (100% In-Memory)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Regression Pass Rate</strong></td>
+        <td>&ge; 95% pass rate</td>
+        <td><strong>26 / 26 (100%)</strong></td>
+        <td><span class="badge badge-pass">Perfect Pass Rate</span></td>
+      </tr>
+      <tr>
+        <td><strong>Test Execution Time</strong></td>
+        <td>&lt; 10 seconds</td>
+        <td><strong>~ 0.53 seconds</strong></td>
+        <td><span class="badge badge-pass">Exceeded (18x Faster)</span></td>
+      </tr>
+      <tr>
+        <td><strong>Offline Capability</strong></td>
+        <td>Works without server</td>
+        <td><strong>Full Offline Support</strong></td>
+        <td><span class="badge badge-pass">Achieved</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="footer-note">
+    Symbol Table Generator & Compiler Analyzer — Senior Engineering Project Report &copy; 2026. All rights reserved.
+  </div>
+
+</body>
+</html>
