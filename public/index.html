@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Symbol Table Generator & Compiler Analyzer | Monaco Editor</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <!-- Monaco Editor AMD Loader from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+</head>
+<body class="theme-dark">
+  <div id="app-root">
+    
+    <!-- Top Application Header -->
+    <header id="app-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7c0-2-1.5-3-3.5-3h-9C5.5 4 4 5 4 7z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6M9 8h6M9 16h4"/>
+            </svg>
+          </div>
+          <div class="brand-titles">
+            <h1>Symbol Table Generator</h1>
+            <span class="sub-brand font-mono">Compiler Scope & Memory Analyzer</span>
+          </div>
+        </div>
+
+        <div class="project-title-box">
+          <input type="text" id="project-title-input" class="input-title" value="Symbol Table Analysis" title="Project Title" placeholder="Project Name...">
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- Language Selector -->
+        <div class="control-group">
+          <label for="select-language" class="control-label">Lang</label>
+          <select id="select-language" class="select-styled font-mono">
+            <option value="c" selected>C (Compiler Standard)</option>
+            <option value="cpp">C++ (OOP & Classes)</option>
+            <option value="java">Java</option>
+            <option value="javascript">JavaScript / TypeScript</option>
+            <option value="python">Python</option>
+          </select>
+        </div>
+
+        <!-- Sample Code Presets -->
+        <div class="control-group">
+          <label for="select-samples" class="control-label">Samples</label>
+          <select id="select-samples" class="select-styled">
+            <option value="c_comprehensive">C: Comprehensive Compiler Test</option>
+            <option value="scoping_shadowing">Lexical Scoping & Shadowing</option>
+            <option value="cpp_oop">C++ OOP & Methods</option>
+            <option value="pointers_arrays">Pointers, Arrays & Memory</option>
+            <option value="python_scoping">Python Scoping</option>
+            <option value="semantic_errors">⚠️ Semantic Errors Showcase</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Generate Button -->
+        <button id="btn-generate" class="btn btn-primary" title="Parse source code and update symbol table (Ctrl+Enter)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Generate Table</span>
+        </button>
+
+        <!-- Export -->
+        <button id="btn-export" class="btn btn-ghost" title="Export as JSON, CSV, LaTeX, Markdown">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+          </svg>
+          <span>Export</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile / Responsive View Switcher Bar (Visible on screens <= 860px) -->
+    <div id="mobile-workspace-nav" class="mobile-nav-bar">
+      <button id="btn-show-editor" class="mobile-nav-btn active" data-view="editor">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span>Code Editor</span>
+      </button>
+      <button id="btn-show-visualizer" class="mobile-nav-btn" data-view="visualizer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/>
+        </svg>
+        <span>Visualizer & Tables</span>
+        <span id="mobile-stat-symbols" class="tab-counter">0</span>
+      </button>
+    </div>
+
+    <!-- Main Workspace Split Pane -->
+    <main id="workspace" class="show-editor">
+      
+      <!-- Left Pane: Monaco Code Editor & Diagnostics -->
+      <section id="left-editor-pane" class="pane">
+        
+        <!-- Editor Header Toolbar -->
+        <div class="editor-toolbar">
+          <div class="toolbar-left">
+            <span class="toolbar-tab active font-mono">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              Source Code
+            </span>
+            <span class="editor-shortcuts-hint">Tip: Click any symbol row on the right to jump here</span>
+          </div>
+
+          <div class="toolbar-right">
+            <button id="btn-format-code" class="btn-tool" title="Format Code">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="21" y1="10" x2="7" y2="10"></line>
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="21" y1="14" x2="3" y2="14"></line>
+                <line x1="21" y1="18" x2="7" y2="18"></line>
+              </svg>
+              Format
+            </button>
+            <span id="cursor-pos" class="status-pill font-mono">Ln 1, Col 1</span>
+          </div>
+        </div>
+
+        <!-- Monaco Editor Container -->
+        <div id="monaco-editor-container"></div>
+
+        <!-- Bottom Diagnostics Drawer -->
+        <div id="diagnostics-drawer" class="diagnostics-panel">
+          <div class="drawer-header" id="btn-toggle-diagnostics">
+            <div class="drawer-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Semantic Diagnostics & Compiler Messages</span>
+              <span id="diag-tab-badge" class="badge badge-neutral">0</span>
+            </div>
+            <button class="drawer-toggle-btn">▼</button>
+          </div>
+          <div id="diagnostics-list" class="drawer-content">
+            <div class="diagnostics-clean">Ready for analysis.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Draggable Pane Divider -->
+      <div id="pane-divider" class="divider" title="Drag to resize panels"></div>
+
+      <!-- Right Pane: Multi-View Visualizer -->
+      <section id="right-visualizer-pane" class="pane">
+        
+        <!-- View Navigation Tabs -->
+        <nav class="view-tabs-bar">
+          <div class="tabs-group">
+            <button class="view-tab-btn active" data-tab="tab-symbol-table">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/>
+              </svg>
+              <span>Symbol Table</span>
+              <span id="stat-total-symbols" class="tab-counter">0</span>
+            </button>
+
+            <button class="view-tab-btn" data-tab="tab-scope-tree">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Scope Tree</span>
+              <span id="stat-total-scopes" class="tab-counter">0</span>
+            </button>
+
+            <button class="view-tab-btn" data-tab="tab-hash-buckets">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+              <span>Hash Buckets</span>
+            </button>
+
+            <button class="view-tab-btn" data-tab="tab-memory-layout">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <line x1="2" y1="10" x2="22" y2="10"/>
+                <line x1="2" y1="15" x2="22" y2="15"/>
+              </svg>
+              <span>Memory & Stack</span>
+            </button>
+          </div>
+        </nav>
+
+        <!-- Tab 1: Symbol Table View -->
+        <div id="tab-symbol-table" class="tab-pane active">
+          
+          <!-- Filters & Search Toolbar -->
+          <div class="table-controls-bar">
+            <div class="search-box">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="table-search-input" placeholder="Search identifier, type, kind, scope...">
+            </div>
+
+            <!-- Scope filter -->
+            <select id="filter-scope-select" class="select-styled select-sm font-mono">
+              <option value="ALL">All Scopes</option>
+            </select>
+
+            <!-- Filter chips -->
+            <div class="filter-chips-list">
+              <button class="filter-chip active" data-filter="ALL">All</button>
+              <button class="filter-chip" data-filter="VARIABLE">Variables</button>
+              <button class="filter-chip" data-filter="FUNCTION">Functions</button>
+              <button class="filter-chip" data-filter="PARAMETER">Params</button>
+              <button class="filter-chip" data-filter="CONSTANT">Constants</button>
+              <button class="filter-chip" data-filter="STRUCT">Structs/Types</button>
+            </div>
+          </div>
+
+          <!-- Symbol Table Data View -->
+          <div class="table-container">
+            <table class="symbol-table" id="main-symbol-table">
+              <thead>
+                <tr>
+                  <th style="width: 38px;">#</th>
+                  <th>Identifier</th>
+                  <th>Kind</th>
+                  <th>Data Type</th>
+                  <th>Scope</th>
+                  <th>Memory Offset</th>
+                  <th>Size</th>
+                  <th>Line:Col</th>
+                  <th>References</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="symbol-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab 2: Scope Tree Hierarchy View -->
+        <div id="tab-scope-tree" class="tab-pane">
+          <div class="tab-helper-banner">
+            <span>Visual representation of static lexical scopes and symbol environments. Click any scope or symbol chip to jump to its code in Monaco.</span>
+          </div>
+          <div id="scope-tree-container" class="tree-scroll-container"></div>
+        </div>
+
+        <!-- Tab 3: Compiler Internal Hash Table View -->
+        <div id="tab-hash-buckets" class="tab-pane">
+          <div class="tab-helper-banner">
+            <span>Simulates how compiler symbol tables perform identifier resolution in $O(1)$ average time using polynomial hashing and bucket chaining.</span>
+          </div>
+          <div id="hash-table-container" class="hash-scroll-container"></div>
+        </div>
+
+        <!-- Tab 4: Memory Layout & Stack Frame -->
+        <div id="tab-memory-layout" class="tab-pane">
+          <div class="tab-helper-banner">
+            <span>Simulates relative memory offsets in the Data Segment (.data/.bss) for globals and the Activation Record (Stack Frame) for functions.</span>
+          </div>
+          <div id="memory-layout-container" class="memory-scroll-container"></div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Bottom Status Bar -->
+    <footer id="app-footer">
+      <div class="footer-left">
+        <span class="status-indicator-dot online"></span>
+        <span id="status-msg">Ready</span>
+      </div>
+
+      <div class="footer-center">
+        <span class="footer-stat">Symbols: <strong id="stat-total-symbols-footer">0</strong></span>
+        <span class="footer-stat">Scopes: <strong id="stat-total-scopes-footer">0</strong></span>
+        <span class="footer-stat">Errors: <span id="stat-total-errors" class="badge badge-success">0</span></span>
+        <span class="footer-stat">Warnings: <span id="stat-total-warnings" class="badge badge-neutral">0</span></span>
+      </div>
+
+      <div class="footer-right font-mono">
+        <span class="pg-engine-tag">Zero-Database Engine</span>
+        <span>UTF-8</span>
+      </div>
+    </footer>
+
+    <!-- Export Modal -->
+    <div id="modal-export" class="modal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Export Symbol Table</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="export-intro">Choose an export format for your symbol table data:</p>
+          <div class="export-grid">
+            <button id="btn-export-json" class="export-card">
+              <div class="export-icon font-mono">JSON</div>
+              <h4>Structured JSON (.json)</h4>
+              <p>Full AST, scopes hierarchy, memory offsets, and compiler diagnostics.</p>
+            </button>
+            <button id="btn-export-csv" class="export-card">
+              <div class="export-icon font-mono">CSV</div>
+              <h4>Spreadsheet CSV (.csv)</h4>
+              <p>Tabular comma-separated values compatible with Excel, Google Sheets, or Pandas.</p>
+            </button>
+            <button id="btn-export-md" class="export-card">
+              <div class="export-icon font-mono">MD</div>
+              <h4>GitHub Markdown (.md)</h4>
+              <p>Formatted Markdown table for documentation, READMEs, or GitHub Gists.</p>
+            </button>
+            <button id="btn-export-tex" class="export-card">
+              <div class="export-icon font-mono">TEX</div>
+              <h4>LaTeX Table (.tex)</h4>
+              <p>Clean booktabs LaTeX table code ready to paste into academic compiler papers.</p>
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-shelf"></div>
+
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="js/samples.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
